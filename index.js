@@ -22,7 +22,7 @@ MongoClient.connect(connectionString, function connectionHandler(err, db) {
 
   var collection = db.collection(config.mongoCollection);
 
-  var cursor = collection.find(function cursorHandler(err, cursor) {
+  var cursor = collection.find(config.filter, function cursorHandler(err, cursor) {
     cursor.each(function(err, item) {
       if (err) {
         console.log(err);
@@ -65,6 +65,14 @@ MongoClient.connect(connectionString, function connectionHandler(err, db) {
 });
 
 var outputResults = function outputResults() {
-  fs.writeFileSync(config.mongoDB + '-' + config.mongoCollection + '.json', prettyFormat(collectionSchema));
+  var filePath = config.mongoDB + '-' + config.mongoCollection;
+  if(Object.keys(config.filter).length !== 0) {
+    filePath += JSON.stringify(config.filter);
+  }
+  filePath += '.json';
+  filePath = filePath.replace(/"/g, '');
+  filePath = filePath.replace(/:/g, '-');
+
+  fs.writeFileSync(filePath, prettyFormat(collectionSchema));
   dbHandle.close();
 };
